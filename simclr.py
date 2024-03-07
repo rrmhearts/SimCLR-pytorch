@@ -25,7 +25,10 @@ class SimCLR(object):
 
     def info_nce_loss(self, features):
 
+        # repeat batch size, n_views times, e.g. 3,2 => [0, 1, 2, 0, 1, 2] as labels.
+        # labels in the first view match the labels in the second view.
         labels = torch.cat([torch.arange(self.args.batch_size) for i in range(self.args.n_views)], dim=0)
+        # 2-D matrix, true on diagonal and one n_views-1 other diagonals, true becomes 1.0
         labels = (labels.unsqueeze(0) == labels.unsqueeze(1)).float()
         labels = labels.to(self.args.device)
 
@@ -37,7 +40,10 @@ class SimCLR(object):
         # assert similarity_matrix.shape == labels.shape
 
         # discard the main diagonal from both: labels and similarities matrix
+        # main diagonal is comparing to itself, mask it out.
         mask = torch.eye(labels.shape[0], dtype=torch.bool).to(self.args.device)
+
+        # diagonal masked, 2-D arrays flattened.
         labels = labels[~mask].view(labels.shape[0], -1)
         similarity_matrix = similarity_matrix[~mask].view(similarity_matrix.shape[0], -1)
         # assert similarity_matrix.shape == labels.shape
@@ -50,7 +56,7 @@ class SimCLR(object):
 
         logits = torch.cat([positives, negatives], dim=1)
         labels = torch.zeros(logits.shape[0], dtype=torch.long).to(self.args.device)
-
+        print( f"logit size: {logits.shape} and labels size: {labels.shape}")
         logits = logits / self.args.temperature
         return logits, labels
 

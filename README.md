@@ -15,6 +15,10 @@ $ conda env create --name simclr --file env.yml
 $ conda activate simclr
 $ python run.py
 ```
+**OR**
+```
+$ pip install -r requirements.txt
+```
 
 ## Config file
 
